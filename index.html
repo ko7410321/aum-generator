@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>AUM Justification Generator</title>
-  <!-- v2026-08-06 Round to 000 -->
   <style>
     :root {
       --primary: #1a56db;
@@ -29,16 +28,18 @@
     .subtitle { font-size: 0.9rem; color: var(--muted); margin-bottom: 16px; }
     .mode-switch {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       margin-bottom: 16px;
+      flex-wrap: wrap;
     }
     .mode-btn {
       flex: 1;
-      padding: 10px;
+      min-width: 90px;
+      padding: 10px 6px;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: #fff;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
@@ -158,6 +159,7 @@
     <div class="mode-switch">
       <button class="mode-btn active" id="modeWorking" onclick="switchMode('working')">Working</button>
       <button class="mode-btn" id="modeRetired" onclick="switchMode('retired')">Retired</button>
+      <button class="mode-btn" id="modeHousewife" onclick="switchMode('housewife')">Housewife</button>
     </div>
 
     <!-- ========== WORKING MODE ========== -->
@@ -301,6 +303,88 @@
       </div>
     </div>
 
+    <!-- ========== HOUSEWIFE MODE ========== -->
+    <div id="housewifeSection" class="hidden">
+      <div class="card">
+        <div class="card-title">1. Housewife 基本資料</div>
+        <div class="grid">
+          <div class="form-group">
+            <label>年齡 (Age)</label>
+            <input type="number" id="h_age" value="68" min="40" max="90" />
+          </div>
+          <div class="form-group">
+            <label>做家庭主婦年數</label>
+            <input type="number" id="h_hwYears" value="10" min="1" max="40" />
+          </div>
+          <div class="form-group full">
+            <label>丈夫姓名 (Husband Name)</label>
+            <input type="text" id="h_husband" value="Mr. Fok Ka Hang" />
+          </div>
+          <div class="form-group">
+            <label>每月生活費 (HKD)</label>
+            <input type="number" id="h_living" value="40000" step="1000" />
+          </div>
+          <div class="form-group">
+            <label>現時總年收入 (HKD)</label>
+            <input type="number" id="h_currentIncome" value="600000" step="10000" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">2. 以前工作資料</div>
+        <div class="grid">
+          <div class="form-group full">
+            <label>以前職位</label>
+            <input type="text" id="h_prevJob" value="administrative admin" />
+          </div>
+          <div class="form-group full">
+            <label>以前工作地點 / 診所</label>
+            <input type="text" id="h_prevWorkplace" value="his husband's dental clinic (Tony KH Fok Dental Surgeon)" />
+          </div>
+          <div class="form-group">
+            <label>工作年資</label>
+            <input type="number" id="h_workYears" value="20" min="1" max="40" />
+          </div>
+          <div class="form-group">
+            <label>工作時期 (e.g. 1988 to 2016)</label>
+            <input type="text" id="h_workPeriod" value="1988 to 2016" />
+          </div>
+          <div class="form-group full">
+            <label>以前平均年薪 (HKD)</label>
+            <input type="number" id="h_prevSalary" value="500000" step="10000" />
+          </div>
+          <div class="form-group full">
+            <label>儲蓄率 (Saving Rate %)</label>
+            <div class="rate-control">
+              <input type="range" id="h_savingRate" min="25" max="45" value="30" step="1" />
+              <span class="rate-value" id="h_rateDisplay">30%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">3. 自動計算結果</div>
+        <div class="calc-row">
+          <span class="calc-label">以前累積 (年薪 × 年資 × 儲蓄率)</span>
+          <span id="h_calcPrev">HKD 0</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">現時年收入 × 主婦年數 × 儲蓄率</span>
+          <span id="h_calcCurrent">HKD 0</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Accumulate Wealth</span>
+          <span id="h_calcAccumulate">HKD 0</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-label">Suggested AUM</span>
+          <span id="h_calcAum">HKD 0</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Common final AUM -->
     <div class="card">
       <div class="card-title">4. 最終 AUM（可手動改）</div>
@@ -320,7 +404,7 @@
       <div class="success-msg" id="copyMsg">已複製到剪貼簿 ✓</div>
     </div>
 
-    <div class="footer">AUM Justification Generator · Working + Retired · ×13.5 → 000</div>
+    <div class="footer">AUM Justification Generator · Working + Retired + Housewife</div>
   </div>
 
   <script>
@@ -330,8 +414,10 @@
       currentMode = mode;
       document.getElementById('modeWorking').classList.toggle('active', mode === 'working');
       document.getElementById('modeRetired').classList.toggle('active', mode === 'retired');
+      document.getElementById('modeHousewife').classList.toggle('active', mode === 'housewife');
       document.getElementById('workingSection').classList.toggle('hidden', mode !== 'working');
       document.getElementById('retiredSection').classList.toggle('hidden', mode !== 'retired');
+      document.getElementById('housewifeSection').classList.toggle('hidden', mode !== 'housewife');
       recalculate();
       generateText();
     }
@@ -349,7 +435,6 @@
 
         document.getElementById("rateDisplay").textContent = rate + "%";
 
-        // ×13.5 後四捨五入到千位（最後三位 000）
         const annual = Math.round((monthly * 13.5) / 1000) * 1000;
         const avg = annual * (avgPercent / 100);
         const accumulate = avg * years * (rate / 100);
@@ -361,7 +446,7 @@
         document.getElementById("calcAum").textContent = formatHKD(suggestedAum);
 
         document.getElementById("finalAum").value = Math.round(suggestedAum);
-      } else {
+      } else if (currentMode === 'retired') {
         const tdIncome = Number(document.getElementById("r_tdIncome").value) || 0;
         const tdRate = Number(document.getElementById("r_tdRate").value) || 2.5;
         const rate = Number(document.getElementById("r_savingRate").value) || 30;
@@ -374,6 +459,27 @@
         document.getElementById("r_calcTd").textContent = formatHKD(tdIncome);
         document.getElementById("r_calcAccumulate").textContent = formatHKD(accumulate);
         document.getElementById("r_calcAum").textContent = formatHKD(suggestedAum);
+
+        document.getElementById("finalAum").value = suggestedAum;
+      } else {
+        // Housewife
+        const hwYears = Number(document.getElementById("h_hwYears").value) || 0;
+        const workYears = Number(document.getElementById("h_workYears").value) || 0;
+        const prevSalary = Number(document.getElementById("h_prevSalary").value) || 0;
+        const currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
+        const rate = Number(document.getElementById("h_savingRate").value) || 30;
+
+        document.getElementById("h_rateDisplay").textContent = rate + "%";
+
+        const prevAccum = prevSalary * workYears * (rate / 100);
+        const currentAccum = currentIncome * hwYears * (rate / 100);
+        const accumulate = prevAccum + currentAccum;
+        const suggestedAum = Math.round(accumulate * 0.95);
+
+        document.getElementById("h_calcPrev").textContent = formatHKD(prevAccum);
+        document.getElementById("h_calcCurrent").textContent = formatHKD(currentAccum);
+        document.getElementById("h_calcAccumulate").textContent = formatHKD(accumulate);
+        document.getElementById("h_calcAum").textContent = formatHKD(suggestedAum);
 
         document.getElementById("finalAum").value = suggestedAum;
       }
@@ -396,13 +502,12 @@
         const avgPercent = Number(document.getElementById("avgPercent").value) || 80;
         const rate = Number(document.getElementById("savingRate").value) || 30;
 
-        // ×13.5 後四捨五入到千位
         const annual = Math.round((monthly * 13.5) / 1000) * 1000;
         const avg = annual * (avgPercent / 100);
         const accumulate = avg * years * (rate / 100);
 
         text = `**Age: ${age} AUM in HKD ${fmt(finalAum)}-**\n\nCustomer is currently working as a ${job} in ‘${company}’.\nNature of business is ${nature}.\n\nAccount mainly for ${purpose}.\n\nCurrent monthly salary HKD ${fmt(monthly)}-\n\nCurrent Annual income HKD ${fmt(annual)} (already included year-end bonus)\n\nAverage annual income for past ${years} years HKD ${fmt(avg)}-\n\nBased on saving rate in Hong Kong is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of HKD ${fmt(accumulate)}-`;
-      } else {
+      } else if (currentMode === 'retired') {
         const age = document.getElementById("r_age").value;
         const retiredYears = document.getElementById("r_retiredYears").value;
         const job = document.getElementById("r_job").value.trim() || "teacher in secondary school";
@@ -415,6 +520,25 @@
         const accumulate = tdIncome / (tdRate / 100);
 
         text = `Age: ${age} AUM in HKD ${fmt(finalAum)}-\n\nCustomer already retired for ${retiredYears} yrs. After her retirement, her main income is TD interest. The TD interest rate is calculated based on an average annual rate of ${tdRate}%, his TD interest income HKD${fmt(tdIncome)}/year.\n\nBefore her retirement she worked as a ${job} for ${workYears} yrs.\nDuring this period, her average annual income was HKD${fmt(prevIncome)}\n\nBased on saving rate in Hong Kong is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of HKD ${fmt(accumulate)}-`;
+      } else {
+        // Housewife text
+        const age = document.getElementById("h_age").value;
+        const hwYears = document.getElementById("h_hwYears").value;
+        const husband = document.getElementById("h_husband").value.trim() || "her husband";
+        const living = Number(document.getElementById("h_living").value) || 0;
+        const currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
+        const prevJob = document.getElementById("h_prevJob").value.trim() || "administrative admin";
+        const workplace = document.getElementById("h_prevWorkplace").value.trim() || "her husband's clinic";
+        const workYears = document.getElementById("h_workYears").value;
+        const workPeriod = document.getElementById("h_workPeriod").value.trim() || "";
+        const prevSalary = Number(document.getElementById("h_prevSalary").value) || 0;
+        const rate = Number(document.getElementById("h_savingRate").value) || 30;
+
+        const prevAccum = prevSalary * workYears * (rate / 100);
+        const currentAccum = currentIncome * hwYears * (rate / 100);
+        const accumulate = prevAccum + currentAccum;
+
+        text = `Age: ${age} AUM in HKD ${fmt(finalAum)}-\n\nCustomer is a Housewife from ${workPeriod ? workPeriod.split(' to ')[1] || '2016' : '2016'}-current.\nIn those ${hwYears} years, her main income is TD interest, investment gain and living expenses (HKD${fmt(living)}/each month) from his husband ${husband}.\nShe worked as a ${prevJob} in ${workplace} for ${workYears} years from ${workPeriod} and average annual salary is HKD${fmt(prevSalary)}.\n\nTotal current annual income: HKD${fmt(currentIncome)}-\n\nBased on saving rate HONG KONG is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of HKD ${fmt(accumulate)}-`;
       }
 
       document.getElementById("preview").value = text;
@@ -440,6 +564,9 @@
       document.getElementById(id).addEventListener("input", recalculate);
     });
     ["r_tdIncome", "r_tdRate", "r_savingRate", "r_prevIncome"].forEach(id => {
+      document.getElementById(id).addEventListener("input", recalculate);
+    });
+    ["h_hwYears", "h_workYears", "h_prevSalary", "h_currentIncome", "h_savingRate", "h_living"].forEach(id => {
       document.getElementById(id).addEventListener("input", recalculate);
     });
 
