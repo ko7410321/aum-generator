@@ -77,7 +77,7 @@
       font-size: 0.95rem;
       background: #fff;
     }
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.15);
@@ -262,6 +262,13 @@
           <div class="form-group">
             <label>年齡 (Age)</label>
             <input type="number" id="r_age" value="63" min="50" max="90" />
+          </div>
+          <div class="form-group">
+            <label>性別 (Gender)</label>
+            <select id="r_gender" onchange="generateText()">
+              <option value="female">Female (she/her)</option>
+              <option value="male">Male (he/him)</option>
+            </select>
           </div>
           <div class="form-group">
             <label>已退休年數 (Years Retired)</label>
@@ -498,7 +505,7 @@
 
         document.getElementById("finalAum").value = suggestedAum;
       } else {
-        // Housewife — 強制正確計算
+        // Housewife
         const hwYears = Number(document.getElementById("h_hwYears").value) || 0;
         const workYears = Number(document.getElementById("h_workYears").value) || 0;
         const prevSalary = Number(document.getElementById("h_prevSalary").value) || 0;
@@ -507,11 +514,8 @@
 
         document.getElementById("h_rateDisplay").textContent = rate + "%";
 
-        // 以前累積
         const prevAccum = prevSalary * workYears * (rate / 100);
-        // 現時累積 = Total current annual income × 主婦年數 × 儲蓄率
         const currentAccum = currentIncome * hwYears * (rate / 100);
-        // 總累積
         const accumulate = prevAccum + currentAccum;
         const suggestedAum = Math.round(accumulate * 0.95);
 
@@ -553,11 +557,17 @@
         const workYears = document.getElementById("r_workYears").value;
         const prevIncome = Number(document.getElementById("r_prevIncome").value) || 0;
         const rate = Number(document.getElementById("r_savingRate").value) || 30;
+        const gender = document.getElementById("r_gender").value;
+
+        // Gender pronouns
+        const subj = gender === 'male' ? 'he' : 'she';
+        const poss = gender === 'male' ? 'his' : 'her';
+        const obj = gender === 'male' ? 'him' : 'her';
 
         const tdIncome = 100000;
         const accumulate = tdIncome / 0.025;
 
-        text = `Age: ${age} AUM in HKD ${fmt(finalAum)}-\n\nCustomer already retired for ${retiredYears} yrs. After her retirement, her main income is TD interest. His TD interest income HKD${fmt(tdIncome)}/year.\n\nBefore her retirement she worked as a ${job} for ${workYears} yrs.\nDuring this period, her average annual income was HKD${fmt(prevIncome)}\n\nBased on saving rate in Hong Kong is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of HKD ${fmt(accumulate)}-`;
+        text = `Age: ${age} AUM in HKD ${fmt(finalAum)}-\n\nCustomer already retired for ${retiredYears} yrs. After ${poss} retirement, ${poss} main income is TD interest. ${subj.charAt(0).toUpperCase() + subj.slice(1)} TD interest income HKD${fmt(tdIncome)}/year.\n\nBefore ${poss} retirement ${subj} worked as a ${job} for ${workYears} yrs.\nDuring this period, ${poss} average annual income was HKD${fmt(prevIncome)}\n\nBased on saving rate in Hong Kong is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of HKD ${fmt(accumulate)}-`;
       } else {
         // Housewife
         const age = document.getElementById("h_age").value;
@@ -609,8 +619,9 @@
     ["monthly", "years", "avgPercent", "savingRate"].forEach(id => {
       document.getElementById(id).addEventListener("input", () => { recalculate(); generateText(); });
     });
-    ["r_savingRate", "r_prevIncome"].forEach(id => {
+    ["r_savingRate", "r_prevIncome", "r_gender"].forEach(id => {
       document.getElementById(id).addEventListener("input", () => { recalculate(); generateText(); });
+      document.getElementById(id).addEventListener("change", () => { recalculate(); generateText(); });
     });
     ["h_hwYears", "h_workYears", "h_prevSalary", "h_currentIncome", "h_savingRate", "h_living", "h_tdInterest", "h_invGain"].forEach(id => {
       document.getElementById(id).addEventListener("input", () => { recalculate(); generateText(); });
