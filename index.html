@@ -333,6 +333,11 @@
             <label>每月生活費 (HKD)</label>
             <input type="number" id="h_living" value="40000" step="1000" />
           </div>
+          <div class="form-group full" id="h_tdGroup" style="display:none;">
+            <label>TD Interest + Investment Gain (年) HKD</label>
+            <input type="number" id="h_tdGain" value="120000" step="10000" />
+            <div class="hint">唔顯示生活費時會用呢個數字</div>
+          </div>
           <div class="form-group">
             <label>現時總年收入 (HKD)</label>
             <input type="number" id="h_currentIncome" value="600000" step="10000" />
@@ -434,6 +439,7 @@
     function toggleLiving() {
       const show = document.getElementById('h_showLiving').checked;
       document.getElementById('h_livingGroup').style.display = show ? 'block' : 'none';
+      document.getElementById('h_tdGroup').style.display = show ? 'none' : 'block';
       generateText();
     }
 
@@ -538,6 +544,7 @@
         const hwYears = document.getElementById("h_hwYears").value;
         const husband = document.getElementById("h_husband").value.trim() || "her husband";
         const living = Number(document.getElementById("h_living").value) || 0;
+        const tdGain = Number(document.getElementById("h_tdGain").value) || 120000;
         const showLiving = document.getElementById("h_showLiving").checked;
         const currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
         const prevJob = document.getElementById("h_prevJob").value.trim() || "administrative admin";
@@ -551,7 +558,7 @@
         const currentAccum = currentIncome * hwYears * (rate / 100);
         const accumulate = prevAccum + currentAccum;
 
-        let incomeDesc = "TD interest and investment gain";
+        let incomeDesc = `TD interest and investment gain of approximately HKD${fmt(tdGain)}/year`;
         if (showLiving) {
           incomeDesc = `TD interest, investment gain and living expenses (HKD${fmt(living)}/each month) from his husband ${husband}`;
         }
@@ -584,7 +591,7 @@
     ["r_savingRate", "r_prevIncome"].forEach(id => {
       document.getElementById(id).addEventListener("input", recalculate);
     });
-    ["h_hwYears", "h_workYears", "h_prevSalary", "h_currentIncome", "h_savingRate", "h_living"].forEach(id => {
+    ["h_hwYears", "h_workYears", "h_prevSalary", "h_currentIncome", "h_savingRate", "h_living", "h_tdGain"].forEach(id => {
       document.getElementById(id).addEventListener("input", recalculate);
     });
 
