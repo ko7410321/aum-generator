@@ -149,6 +149,23 @@
       margin-top: 20px;
     }
     .hidden { display: none !important; }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
+    .checkbox-row label {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text);
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -306,7 +323,13 @@
             <label>丈夫姓名 (Husband Name)</label>
             <input type="text" id="h_husband" value="Mr. Fok Ka Hang" />
           </div>
-          <div class="form-group">
+          <div class="form-group full">
+            <div class="checkbox-row">
+              <input type="checkbox" id="h_showLiving" checked onchange="toggleLiving()" />
+              <label for="h_showLiving">顯示丈夫提供嘅每月生活費</label>
+            </div>
+          </div>
+          <div class="form-group" id="h_livingGroup">
             <label>每月生活費 (HKD)</label>
             <input type="number" id="h_living" value="40000" step="1000" />
           </div>
@@ -408,6 +431,12 @@
       generateText();
     }
 
+    function toggleLiving() {
+      const show = document.getElementById('h_showLiving').checked;
+      document.getElementById('h_livingGroup').style.display = show ? 'block' : 'none';
+      generateText();
+    }
+
     function formatHKD(num) {
       return "HKD " + Math.round(num).toLocaleString("en-US");
     }
@@ -436,9 +465,8 @@
         const rate = Number(document.getElementById("r_savingRate").value) || 30;
         document.getElementById("r_rateDisplay").textContent = rate + "%";
 
-        // Fixed TD interest = 100,000
         const tdIncome = 100000;
-        const accumulate = tdIncome / 0.025; // 4,000,000
+        const accumulate = tdIncome / 0.025;
         const suggestedAum = Math.round(accumulate * 0.98);
 
         document.getElementById("r_calcTd").textContent = formatHKD(tdIncome);
@@ -510,6 +538,7 @@
         const hwYears = document.getElementById("h_hwYears").value;
         const husband = document.getElementById("h_husband").value.trim() || "her husband";
         const living = Number(document.getElementById("h_living").value) || 0;
+        const showLiving = document.getElementById("h_showLiving").checked;
         const currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
         const prevJob = document.getElementById("h_prevJob").value.trim() || "administrative admin";
         const workplace = document.getElementById("h_prevWorkplace").value.trim() || "her husband's clinic";
@@ -522,7 +551,12 @@
         const currentAccum = currentIncome * hwYears * (rate / 100);
         const accumulate = prevAccum + currentAccum;
 
-        text = `Age: ${age} AUM in HKD ${fmt(finalAum)}-\n\nCustomer is a Housewife from ${workPeriod ? workPeriod.split(' to ')[1] || '2016' : '2016'}-current.\nIn those ${hwYears} years, her main income is TD interest, investment gain and living expenses (HKD${fmt(living)}/each month) from his husband ${husband}.\nShe worked as a ${prevJob} in ${workplace} for ${workYears} years from ${workPeriod} and average annual salary is HKD${fmt(prevSalary)}.\n\nTotal current annual income: HKD${fmt(currentIncome)}-\n\nBased on saving rate HONG KONG is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of HKD ${fmt(accumulate)}-`;
+        let incomeDesc = "TD interest and investment gain";
+        if (showLiving) {
+          incomeDesc = `TD interest, investment gain and living expenses (HKD${fmt(living)}/each month) from his husband ${husband}`;
+        }
+
+        text = `Age: ${age} AUM in HKD ${fmt(finalAum)}-\n\nCustomer is a Housewife from ${workPeriod ? workPeriod.split(' to ')[1] || '2016' : '2016'}-current.\nIn those ${hwYears} years, her main income is ${incomeDesc}.\nShe worked as a ${prevJob} in ${workplace} for ${workYears} years from ${workPeriod} and average annual salary is HKD${fmt(prevSalary)}.\n\nTotal current annual income: HKD${fmt(currentIncome)}-\n\nBased on saving rate HONG KONG is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of HKD ${fmt(accumulate)}-`;
       }
 
       document.getElementById("preview").value = text;
