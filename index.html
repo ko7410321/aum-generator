@@ -444,14 +444,24 @@
       document.getElementById('h_livingGroup').style.display = show ? 'block' : 'none';
       document.getElementById('h_tdGroup').style.display = show ? 'none' : 'block';
       document.getElementById('h_invGroup').style.display = show ? 'none' : 'block';
-      // 當唔顯示生活費時，隱藏手動總年收入，改用 TD+Inv
       document.getElementById('h_currentIncomeGroup').style.display = show ? 'block' : 'none';
-      generateText();
       recalculate();
+      generateText();
     }
 
     function formatHKD(num) {
       return "HKD " + Math.round(num).toLocaleString("en-US");
+    }
+
+    function getHousewifeCurrentIncome() {
+      const showLiving = document.getElementById("h_showLiving").checked;
+      if (showLiving) {
+        return Number(document.getElementById("h_currentIncome").value) || 0;
+      } else {
+        const td = Number(document.getElementById("h_tdInterest").value) || 0;
+        const inv = Number(document.getElementById("h_invGain").value) || 0;
+        return td + inv;
+      }
     }
 
     function recalculate() {
@@ -488,26 +498,20 @@
 
         document.getElementById("finalAum").value = suggestedAum;
       } else {
-        // Housewife
+        // Housewife — 強制正確計算
         const hwYears = Number(document.getElementById("h_hwYears").value) || 0;
         const workYears = Number(document.getElementById("h_workYears").value) || 0;
         const prevSalary = Number(document.getElementById("h_prevSalary").value) || 0;
-        const showLiving = document.getElementById("h_showLiving").checked;
-        const tdInterest = Number(document.getElementById("h_tdInterest").value) || 80000;
-        const invGain = Number(document.getElementById("h_invGain").value) || 40000;
-        let currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
-
-        // 如果唔顯示生活費，總年收入 = TD + Investment
-        if (!showLiving) {
-          currentIncome = tdInterest + invGain;
-        }
-
         const rate = Number(document.getElementById("h_savingRate").value) || 30;
+        const currentIncome = getHousewifeCurrentIncome();
 
         document.getElementById("h_rateDisplay").textContent = rate + "%";
 
+        // 以前累積
         const prevAccum = prevSalary * workYears * (rate / 100);
+        // 現時累積 = Total current annual income × 主婦年數 × 儲蓄率
         const currentAccum = currentIncome * hwYears * (rate / 100);
+        // 總累積
         const accumulate = prevAccum + currentAccum;
         const suggestedAum = Math.round(accumulate * 0.95);
 
@@ -555,7 +559,7 @@
 
         text = `Age: ${age} AUM in HKD ${fmt(finalAum)}-\n\nCustomer already retired for ${retiredYears} yrs. After her retirement, her main income is TD interest. His TD interest income HKD${fmt(tdIncome)}/year.\n\nBefore her retirement she worked as a ${job} for ${workYears} yrs.\nDuring this period, her average annual income was HKD${fmt(prevIncome)}\n\nBased on saving rate in Hong Kong is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of HKD ${fmt(accumulate)}-`;
       } else {
-        // Housewife text
+        // Housewife
         const age = document.getElementById("h_age").value;
         const hwYears = document.getElementById("h_hwYears").value;
         const husband = document.getElementById("h_husband").value.trim() || "her husband";
@@ -563,13 +567,7 @@
         const tdInterest = Number(document.getElementById("h_tdInterest").value) || 80000;
         const invGain = Number(document.getElementById("h_invGain").value) || 40000;
         const showLiving = document.getElementById("h_showLiving").checked;
-        let currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
-
-        // 關鍵：唔顯示生活費時，Total current annual income = TD + Investment
-        if (!showLiving) {
-          currentIncome = tdInterest + invGain;
-        }
-
+        const currentIncome = getHousewifeCurrentIncome();
         const prevJob = document.getElementById("h_prevJob").value.trim() || "administrative admin";
         const workplace = document.getElementById("h_prevWorkplace").value.trim() || "her husband's clinic";
         const workYears = document.getElementById("h_workYears").value;
@@ -609,13 +607,13 @@
     }
 
     ["monthly", "years", "avgPercent", "savingRate"].forEach(id => {
-      document.getElementById(id).addEventListener("input", recalculate);
+      document.getElementById(id).addEventListener("input", () => { recalculate(); generateText(); });
     });
     ["r_savingRate", "r_prevIncome"].forEach(id => {
-      document.getElementById(id).addEventListener("input", recalculate);
+      document.getElementById(id).addEventListener("input", () => { recalculate(); generateText(); });
     });
     ["h_hwYears", "h_workYears", "h_prevSalary", "h_currentIncome", "h_savingRate", "h_living", "h_tdInterest", "h_invGain"].forEach(id => {
-      document.getElementById(id).addEventListener("input", recalculate);
+      document.getElementById(id).addEventListener("input", () => { recalculate(); generateText(); });
     });
 
     recalculate();
