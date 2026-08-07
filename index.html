@@ -341,7 +341,7 @@
             <label>Investment Gain (年) HKD</label>
             <input type="number" id="h_invGain" value="40000" step="5000" />
           </div>
-          <div class="form-group">
+          <div class="form-group" id="h_currentIncomeGroup">
             <label>現時總年收入 (HKD)</label>
             <input type="number" id="h_currentIncome" value="600000" step="10000" />
           </div>
@@ -444,7 +444,10 @@
       document.getElementById('h_livingGroup').style.display = show ? 'block' : 'none';
       document.getElementById('h_tdGroup').style.display = show ? 'none' : 'block';
       document.getElementById('h_invGroup').style.display = show ? 'none' : 'block';
+      // 當唔顯示生活費時，隱藏手動總年收入，改用 TD+Inv
+      document.getElementById('h_currentIncomeGroup').style.display = show ? 'block' : 'none';
       generateText();
+      recalculate();
     }
 
     function formatHKD(num) {
@@ -489,7 +492,16 @@
         const hwYears = Number(document.getElementById("h_hwYears").value) || 0;
         const workYears = Number(document.getElementById("h_workYears").value) || 0;
         const prevSalary = Number(document.getElementById("h_prevSalary").value) || 0;
-        const currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
+        const showLiving = document.getElementById("h_showLiving").checked;
+        const tdInterest = Number(document.getElementById("h_tdInterest").value) || 80000;
+        const invGain = Number(document.getElementById("h_invGain").value) || 40000;
+        let currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
+
+        // 如果唔顯示生活費，總年收入 = TD + Investment
+        if (!showLiving) {
+          currentIncome = tdInterest + invGain;
+        }
+
         const rate = Number(document.getElementById("h_savingRate").value) || 30;
 
         document.getElementById("h_rateDisplay").textContent = rate + "%";
@@ -551,7 +563,13 @@
         const tdInterest = Number(document.getElementById("h_tdInterest").value) || 80000;
         const invGain = Number(document.getElementById("h_invGain").value) || 40000;
         const showLiving = document.getElementById("h_showLiving").checked;
-        const currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
+        let currentIncome = Number(document.getElementById("h_currentIncome").value) || 0;
+
+        // 關鍵：唔顯示生活費時，Total current annual income = TD + Investment
+        if (!showLiving) {
+          currentIncome = tdInterest + invGain;
+        }
+
         const prevJob = document.getElementById("h_prevJob").value.trim() || "administrative admin";
         const workplace = document.getElementById("h_prevWorkplace").value.trim() || "her husband's clinic";
         const workYears = document.getElementById("h_workYears").value;
