@@ -248,7 +248,7 @@
           <span id="calcAccumulate">HKD 0</span>
         </div>
         <div class="calc-row">
-          <span class="calc-label">Suggested AUM (= Acc − 100,000)</span>
+          <span class="calc-label">Suggested AUM (Acc−100k → round up 00000)</span>
           <span id="calcAum">HKD 0</span>
         </div>
       </div>
@@ -307,7 +307,7 @@
           <span id="r_calcAccumulate">HKD 0</span>
         </div>
         <div class="calc-row">
-          <span class="calc-label">Suggested AUM (= Acc − 100,000)</span>
+          <span class="calc-label">Suggested AUM (Acc−100k → round up 00000)</span>
           <span id="r_calcAum">HKD 0</span>
         </div>
       </div>
@@ -403,7 +403,7 @@
           <span id="h_calcAccumulate">HKD 0</span>
         </div>
         <div class="calc-row">
-          <span class="calc-label">Suggested AUM (= Acc − 100,000)</span>
+          <span class="calc-label">Suggested AUM (Acc−100k → round up 00000)</span>
           <span id="h_calcAum">HKD 0</span>
         </div>
       </div>
@@ -415,7 +415,7 @@
       <div class="form-group">
         <label>顯示用 AUM (HKD)</label>
         <input type="number" id="finalAum" value="1100000" step="100000" />
-        <div class="hint">預設 = Accumulate Wealth − 100,000</div>
+        <div class="hint">預設 = (Accumulate Wealth − 100,000) 再向上取整到 00000</div>
       </div>
     </div>
 
@@ -489,7 +489,7 @@
         const annual = Math.round((monthly * 13.5) / 1000) * 1000;
         const avg = annual * (avgPercent / 100);
         const accumulate = roundUp100k(avg * years * (rate / 100));
-        const suggestedAum = Math.max(0, accumulate - 100000);
+        const suggestedAum = roundUp100k(Math.max(0, accumulate - 100000));
 
         document.getElementById("calcAnnual").textContent = formatHKD(annual);
         document.getElementById("calcAvg").textContent = formatHKD(avg);
@@ -503,7 +503,7 @@
 
         const tdIncome = 100000;
         const accumulate = roundUp100k(tdIncome / 0.025);
-        const suggestedAum = Math.max(0, accumulate - 100000);
+        const suggestedAum = roundUp100k(Math.max(0, accumulate - 100000));
 
         document.getElementById("r_calcTd").textContent = formatHKD(tdIncome);
         document.getElementById("r_calcAccumulate").textContent = formatHKD(accumulate);
@@ -523,7 +523,7 @@
         const prevAccum = prevSalary * workYears * (rate / 100);
         const currentAccum = currentIncome * hwYears * (rate / 100);
         const accumulate = roundUp100k(prevAccum + currentAccum);
-        const suggestedAum = Math.max(0, accumulate - 100000);
+        const suggestedAum = roundUp100k(Math.max(0, accumulate - 100000));
 
         document.getElementById("h_calcPrev").textContent = formatHKD(prevAccum);
         document.getElementById("h_calcCurrent").textContent = formatHKD(currentAccum);
