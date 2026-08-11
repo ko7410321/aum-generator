@@ -303,7 +303,7 @@
           <span id="r_calcTd">HKD 100,000</span>
         </div>
         <div class="calc-row">
-          <span class="calc-label">Accumulate Wealth (round up 00000)</span>
+          <span class="calc-label">Accumulate Wealth (年收入 × 年資 × 儲蓄率)</span>
           <span id="r_calcAccumulate">HKD 0</span>
         </div>
         <div class="calc-row">
@@ -499,13 +499,16 @@
         document.getElementById("finalAum").value = suggestedAum;
       } else if (currentMode === 'retired') {
         const rate = Number(document.getElementById("r_savingRate").value) || 30;
+        const prevIncome = Number(document.getElementById("r_prevIncome").value) || 0;
+        const workYears = Number(document.getElementById("r_workYears").value) || 0;
+
         document.getElementById("r_rateDisplay").textContent = rate + "%";
 
-        const tdIncome = 100000;
-        const accumulate = roundUp100k(tdIncome / 0.025);
+        // 過去年收入 × 工作年數 × 儲蓄率
+        const accumulate = roundUp100k(prevIncome * workYears * (rate / 100));
         const suggestedAum = roundUp100k(Math.max(0, accumulate - 100000));
 
-        document.getElementById("r_calcTd").textContent = formatHKD(tdIncome);
+        document.getElementById("r_calcTd").textContent = formatHKD(100000);
         document.getElementById("r_calcAccumulate").textContent = formatHKD(accumulate);
         document.getElementById("r_calcAum").textContent = formatHKD(suggestedAum);
 
@@ -569,7 +572,8 @@
         const poss = gender === 'male' ? 'his' : 'her';
 
         const tdIncome = 100000;
-        const accumulate = roundUp100k(tdIncome / 0.025);
+        // 過去年收入 × 工作年數 × 儲蓄率
+        const accumulate = roundUp100k(prevIncome * workYears * (rate / 100));
 
         text = `Age: ${age} AUM in HKD ${fmt(finalAum)}-\n\nCustomer already retired for ${retiredYears} yrs. After ${poss} retirement, ${poss} main income is TD interest. ${subj.charAt(0).toUpperCase() + subj.slice(1)} TD interest income HKD${fmt(tdIncome)}/year.\n\nBefore ${poss} retirement ${subj} worked as a ${job} for ${workYears} yrs.\nDuring this period, ${poss} average annual income was HKD${fmt(prevIncome)}\n\nBased on saving rate in Hong Kong is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of HKD ${fmt(accumulate)}-`;
       } else {
@@ -623,7 +627,7 @@
     ["monthly", "years", "avgPercent", "savingRate"].forEach(id => {
       document.getElementById(id).addEventListener("input", () => { recalculate(); generateText(); });
     });
-    ["r_savingRate", "r_prevIncome", "r_gender"].forEach(id => {
+    ["r_savingRate", "r_prevIncome", "r_workYears", "r_gender"].forEach(id => {
       document.getElementById(id).addEventListener("input", () => { recalculate(); generateText(); });
       document.getElementById(id).addEventListener("change", () => { recalculate(); generateText(); });
     });
