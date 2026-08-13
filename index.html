@@ -54,6 +54,7 @@
       align-items: center;
       gap: 10px;
       margin-bottom: 16px;
+      flex-wrap: wrap;
     }
     .currency-row label {
       font-size: 0.85rem;
@@ -63,8 +64,24 @@
     }
     .currency-row select {
       width: auto;
-      min-width: 100px;
+      min-width: 90px;
       padding: 8px 12px;
+    }
+    .btn-convert {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      background: #059669;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .rate-hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      width: 100%;
     }
     .card {
       background: var(--card);
@@ -198,10 +215,12 @@
 
     <div class="currency-row">
       <label>貨幣 (Currency)</label>
-      <select id="currency" onchange="recalculate(); generateText();">
+      <select id="currency" onchange="recalculate(); generateText(); updateConvertBtn();">
         <option value="HKD">HKD</option>
         <option value="CNY">CNY</option>
       </select>
+      <button class="btn-convert" id="convertBtn" onclick="convertCurrency()">一鍵轉 CNY</button>
+      <div class="rate-hint">匯率：1 HKD ≈ 0.86 CNY（市場中間價）</div>
     </div>
 
     <!-- ========== WORKING MODE ========== -->
@@ -459,13 +478,15 @@
   <script>
     let currentMode = 'working';
 
-    // 向上取整到最近 100,000（最後五位變 00000）
+    // 固定匯率：1 HKD = 0.86 CNY
+    const HKD_TO_CNY = 0.86;
+    const CNY_TO_HKD = 1 / 0.86;
+
     function roundUp100k(num) {
       if (num <= 0) return 0;
       return Math.ceil(num / 100000) * 100000;
     }
 
-    // 向下取整到萬位（最後四位變 0000）
     function roundDown10k(num) {
       if (num <= 0) return 0;
       return Math.floor(num / 10000) * 10000;
@@ -477,6 +498,41 @@
 
     function formatMoney(num) {
       return getCurrency() + ' ' + Math.round(num).toLocaleString('en-US');
+    }
+
+    function updateConvertBtn() {
+      const cur = getCurrency();
+      const btn = document.getElementById('convertBtn');
+      btn.textContent = cur === 'HKD' ? '一鍵轉 CNY' : '一鍵轉 HKD';
+    }
+
+    // 一鍵轉換所有金額欄位
+    function convertCurrency() {
+      const cur = getCurrency();
+      const factor = cur === 'HKD' ? HKD_TO_CNY : CNY_TO_HKD;
+      const newCur = cur === 'HKD' ? 'CNY' : 'HKD';
+
+      // 需要轉換嘅 input id
+      const fields = [
+        'monthly',
+        'r_prevIncome',
+        'h_living', 'h_tdInterest', 'h_invGain', 'h_currentIncome', 'h_prevSalary',
+        'finalAum'
+      ];
+
+      fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          const val = Number(el.value) || 0;
+          el.value = Math.round(val * factor);
+        }
+      });
+
+      // 切換貨幣
+      document.getElementById('currency').value = newCur;
+      updateConvertBtn();
+      recalculate();
+      generateText();
     }
 
     function switchMode(mode) {
@@ -548,7 +604,6 @@
 
         document.getElementById('finalAum').value = suggestedAum;
       } else {
-        // Housewife
         const hwYears = Number(document.getElementById('h_hwYears').value) || 0;
         const workYears = Number(document.getElementById('h_workYears').value) || 0;
         const prevSalary = Number(document.getElementById('h_prevSalary').value) || 0;
@@ -611,7 +666,6 @@
 
         text = `Age: ${age} AUM in ${cur} ${fmt(finalAum)}-\n\nCustomer already retired for ${retiredYears} yrs. After ${poss} retirement, ${poss} main income is TD interest. ${subj.charAt(0).toUpperCase() + subj.slice(1)} TD interest income ${cur}${fmt(tdIncome)}/year.\n\nBefore ${poss} retirement ${subj} worked as a ${job} for ${workYears} yrs.\nDuring this period, ${poss} average annual income was ${cur}${fmt(prevIncome)}\n\nBased on saving rate in Hong Kong is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of ${cur} ${fmt(accumulate)}-`;
       } else {
-        // Housewife
         const age = document.getElementById('h_age').value;
         const hwYears = document.getElementById('h_hwYears').value;
         const husband = document.getElementById('h_husband').value.trim() || 'her husband';
@@ -669,6 +723,7 @@
       document.getElementById(id).addEventListener('input', () => { recalculate(); generateText(); });
     });
 
+    updateConvertBtn();
     recalculate();
     generateText();
   </script>
