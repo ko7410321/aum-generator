@@ -288,7 +288,7 @@
           <span id="calcAvg">0</span>
         </div>
         <div class="calc-row">
-          <span class="calc-label">Accumulate Wealth (round up 00000)</span>
+          <span class="calc-label">Accumulate Wealth (實際值)</span>
           <span id="calcAccumulate">0</span>
         </div>
         <div class="calc-row">
@@ -443,7 +443,7 @@
           <span id="h_calcCurrent">0</span>
         </div>
         <div class="calc-row">
-          <span class="calc-label">Accumulate Wealth (round up 00000)</span>
+          <span class="calc-label">Accumulate Wealth (實際值)</span>
           <span id="h_calcAccumulate">0</span>
         </div>
         <div class="calc-row">
@@ -482,11 +482,7 @@
     const HKD_TO_CNY = 0.86;
     const CNY_TO_HKD = 1 / 0.86;
 
-    function roundUp100k(num) {
-      if (num <= 0) return 0;
-      return Math.ceil(num / 100000) * 100000;
-    }
-
+    // 向下取整到萬位（最後四位變 0000）— 只用喺 AUM
     function roundDown10k(num) {
       if (num <= 0) return 0;
       return Math.floor(num / 10000) * 10000;
@@ -512,7 +508,6 @@
       const factor = cur === 'HKD' ? HKD_TO_CNY : CNY_TO_HKD;
       const newCur = cur === 'HKD' ? 'CNY' : 'HKD';
 
-      // 需要轉換嘅 input id
       const fields = [
         'monthly',
         'r_prevIncome',
@@ -528,7 +523,6 @@
         }
       });
 
-      // 切換貨幣
       document.getElementById('currency').value = newCur;
       updateConvertBtn();
       recalculate();
@@ -579,7 +573,9 @@
 
         const annual = Math.round((monthly * 13.5) / 1000) * 1000;
         const avg = annual * (avgPercent / 100);
-        const accumulate = roundUp100k(avg * years * (rate / 100));
+        // Accumulate Wealth：用實際值，唔 round
+        const accumulate = avg * years * (rate / 100);
+        // AUM：Acc − 100k，再向下取整到萬位
         const suggestedAum = roundDown10k(Math.max(0, accumulate - 100000));
 
         document.getElementById('calcAnnual').textContent = formatMoney(annual);
@@ -595,7 +591,8 @@
 
         document.getElementById('r_rateDisplay').textContent = rate + '%';
 
-        const accumulate = roundUp100k(prevIncome * workYears * (rate / 100));
+        // Accumulate Wealth：用實際值，唔 round
+        const accumulate = prevIncome * workYears * (rate / 100);
         const suggestedAum = roundDown10k(Math.max(0, accumulate - 100000));
 
         document.getElementById('r_calcTd').textContent = formatMoney(100000);
@@ -614,7 +611,8 @@
 
         const prevAccum = prevSalary * workYears * (rate / 100);
         const currentAccum = currentIncome * hwYears * (rate / 100);
-        const accumulate = roundUp100k(prevAccum + currentAccum);
+        // Accumulate Wealth：用實際值，唔 round
+        const accumulate = prevAccum + currentAccum;
         const suggestedAum = roundDown10k(Math.max(0, accumulate - 100000));
 
         document.getElementById('h_calcPrev').textContent = formatMoney(prevAccum);
@@ -646,7 +644,7 @@
 
         const annual = Math.round((monthly * 13.5) / 1000) * 1000;
         const avg = annual * (avgPercent / 100);
-        const accumulate = roundUp100k(avg * years * (rate / 100));
+        const accumulate = avg * years * (rate / 100);
 
         text = `**Age: ${age} AUM in ${cur} ${fmt(finalAum)}-**\n\nCustomer is currently working as a ${job} in '${company}'.\nNature of business is ${nature}.\n\nAccount mainly for ${purpose}.\n\nCurrent monthly salary ${cur} ${fmt(monthly)}-\n\nCurrent Annual income ${cur} ${fmt(annual)} (already included year-end bonus)\n\nAverage annual income for past ${years} years ${cur} ${fmt(avg)}-\n\nBased on saving rate in Hong Kong is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of ${cur} ${fmt(accumulate)}-`;
       } else if (currentMode === 'retired') {
@@ -662,7 +660,7 @@
         const poss = gender === 'male' ? 'his' : 'her';
 
         const tdIncome = 100000;
-        const accumulate = roundUp100k(prevIncome * workYears * (rate / 100));
+        const accumulate = prevIncome * workYears * (rate / 100);
 
         text = `Age: ${age} AUM in ${cur} ${fmt(finalAum)}-\n\nCustomer already retired for ${retiredYears} yrs. After ${poss} retirement, ${poss} main income is TD interest. ${subj.charAt(0).toUpperCase() + subj.slice(1)} TD interest income ${cur}${fmt(tdIncome)}/year.\n\nBefore ${poss} retirement ${subj} worked as a ${job} for ${workYears} yrs.\nDuring this period, ${poss} average annual income was ${cur}${fmt(prevIncome)}\n\nBased on saving rate in Hong Kong is ${rate}% and asset appreciation,\nit is plausible and reasonable for customer to accumulate wealth of ${cur} ${fmt(accumulate)}-`;
       } else {
@@ -683,7 +681,7 @@
 
         const prevAccum = prevSalary * workYears * (rate / 100);
         const currentAccum = currentIncome * hwYears * (rate / 100);
-        const accumulate = roundUp100k(prevAccum + currentAccum);
+        const accumulate = prevAccum + currentAccum;
 
         let incomeDesc = `TD interest of ${cur}${fmt(tdInterest)}/year and investment gain of ${cur}${fmt(invGain)}/year`;
         if (showLiving) {
