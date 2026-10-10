@@ -496,19 +496,19 @@
       return getCurrency() + ' ' + Math.round(num).toLocaleString('en-US');
     }
 
-    // Dual currency format: CNY xxx (equivalent to HKD yyy)
+    // Dual currency format: only when original is CNY → CNY xxx (equivalent to HKD yyy)
+    // If original is HKD, just show HKD
     function formatDual(num) {
       const cur = getCurrency();
-      let hkd, cny;
-      if (cur === 'HKD') {
-        hkd = Math.round(num);
-        cny = Math.round(num * HKD_TO_CNY);
+      const fmt = (n) => Math.round(n).toLocaleString('en-US');
+      if (cur === 'CNY') {
+        const cny = Math.round(num);
+        const hkd = Math.round(num * CNY_TO_HKD);
+        return `CNY ${fmt(cny)} (equivalent to HKD ${fmt(hkd)})`;
       } else {
-        cny = Math.round(num);
-        hkd = Math.round(num * CNY_TO_HKD);
+        // HKD original → keep simple HKD
+        return `HKD ${fmt(num)}`;
       }
-      const fmt = (n) => n.toLocaleString('en-US');
-      return `CNY ${fmt(cny)} (equivalent to HKD ${fmt(hkd)})`;
     }
 
     function updateConvertBtn() {
